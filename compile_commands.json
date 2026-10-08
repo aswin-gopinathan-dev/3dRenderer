@@ -1,0 +1,34 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Iinc",
+      "-c",
+      "-o",
+      "build/Display.o",
+      "src/Display.cpp"
+    ],
+    "directory": "/home/aswin/Projects/3dRenderer",
+    "file": "/home/aswin/Projects/3dRenderer/src/Display.cpp",
+    "output": "/home/aswin/Projects/3dRenderer/build/Display.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Iinc",
+      "-c",
+      "-o",
+      "build/main.o",
+      "src/main.cpp"
+    ],
+    "directory": "/home/aswin/Projects/3dRenderer",
+    "file": "/home/aswin/Projects/3dRenderer/src/main.cpp",
+    "output": "/home/aswin/Projects/3dRenderer/build/main.o"
+  }
+]
