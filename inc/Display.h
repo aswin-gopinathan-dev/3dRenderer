@@ -17,11 +17,14 @@ public:
 
     void DrawGrid();
     void DrawRect(int x, int y, int width, int height, uint32_t color);
+    void DrawPixel(int x, int y, uint32_t color);
+    
 
     SDL_Renderer* GetRenderer() { return m_renderer; }
     SDL_Texture* GetTexture() { return m_texture; }
     SDL_Window* GetWindow() { return m_window; }
-
+    int GetWindowWidth() { return m_windowWidth; }
+    int GetWindowHeight() { return m_windowHeight; }
 
 private:
     SDL_Window* m_window;

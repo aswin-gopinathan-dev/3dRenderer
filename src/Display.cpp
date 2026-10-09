@@ -41,7 +41,7 @@ Display::~Display()
     delete[] m_colorBuffer;
     SDL_DestroyTexture(m_texture);
     SDL_DestroyRenderer(m_renderer);
-    SDL_DestroyWindow(m_window);
+    //SDL_DestroyWindow(m_window);
     SDL_Quit();
 }
 
@@ -86,10 +86,14 @@ void Display::DrawRect(int x, int y, int width, int height, uint32_t color)
         {
             int current_x = x + i;
             int current_y = y + j;
-            m_colorBuffer[(m_windowWidth * current_y) + current_x] = color;
+            DrawPixel(current_x, current_y, color);
         }
     }
 }
 
 
-
+void Display::DrawPixel(int x, int y, uint32_t color)
+{
+    if( x>=0 && x<= m_windowWidth && y >= 0 && y <= m_windowHeight )
+        m_colorBuffer[(m_windowWidth * y) + x] = color;
+}
