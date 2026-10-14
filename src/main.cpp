@@ -8,7 +8,9 @@ bool is_running = true;
 Display g_display;
 std::vector<Vec3D> g_cube_points;
 std::vector<Vec2D> g_projected_points;
-float fov_factor = 128;
+Vec3D camera_pos {0, 0, -5};
+Vec3D cube_rotation {};
+float fov_factor = 640;
 
 
 void setup()
@@ -49,16 +51,25 @@ void process_input(void)
 
 Vec2D project(Vec3D& pt)
 {
-    Vec2D v {fov_factor * pt.x, fov_factor * pt.y};
+    Vec2D v {fov_factor * pt.x / pt.z, fov_factor * pt.y / pt.z};
     return v;
 }
 
 
 void update(void) 
 {
+    cube_rotation.x += 0.005;
+    cube_rotation.y += 0.005;
+    cube_rotation.z += 0.005;
     g_projected_points.clear();
     for (auto v : g_cube_points)
     {
+        v.Rotate(Axis::X_AXIS, cube_rotation.x);
+        v.Rotate(Axis::Y_AXIS, cube_rotation.y);
+        v.Rotate(Axis::Z_AXIS, cube_rotation.z);
+        
+        // Move the point away from camera
+        v.z -= camera_pos.z;
         Vec2D projected_point = project(v);
         g_projected_points.push_back(projected_point);
     }
