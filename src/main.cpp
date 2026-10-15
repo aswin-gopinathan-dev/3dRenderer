@@ -2,33 +2,23 @@
 #include <SDL2/SDL.h>
 #include "Display.h"
 #include "Vector.h"
+#include "Triangle.h"
+#include "Mesh.h"
 #include <vector>
+#include <algorithm>
 
 bool is_running = true;
 Display g_display;
-std::vector<Vec3D> g_cube_points;
-std::vector<Vec2D> g_projected_points;
+Mesh g_mesh;
 Vec3D camera_pos {0, 0, -5};
 Vec3D cube_rotation {};
 float fov_factor = 640;
+std::vector<Triangle> triangles_to_render;
 
 
 void setup()
 {
-    g_cube_points.resize(9*9*9);
-    g_projected_points.resize(9*9*9);
-
-    for(float x=-1; x<=1; x += 0.25)
-    {
-        for(float y=-1; y<=1; y += 0.25)
-        {
-            for(float z=-1; z<=1; z += 0.25)
-            {
-                Vec3D pt {x, y, z};
-                g_cube_points.push_back(pt);
-            }
-        }        
-    }
+    
 }
 
 void process_input(void) 
@@ -61,17 +51,36 @@ void update(void)
     cube_rotation.x += 0.005;
     cube_rotation.y += 0.005;
     cube_rotation.z += 0.005;
-    g_projected_points.clear();
-    for (auto v : g_cube_points)
+
+    triangles_to_render.clear();
+    std::vector<Vec3D> vertices = g_mesh.GetMeshVertices();
+    std::vector<Face> faces = g_mesh.GetMeshFaces();
+    for(auto face : faces)
     {
-        v.Rotate(Axis::X_AXIS, cube_rotation.x);
-        v.Rotate(Axis::Y_AXIS, cube_rotation.y);
-        v.Rotate(Axis::Z_AXIS, cube_rotation.z);
+        Vec3D face_vertices[3];
+        face_vertices[0] = vertices[face.a-1];
+        face_vertices[1] = vertices[face.b-1];
+        face_vertices[2] = vertices[face.c-1];
         
-        // Move the point away from camera
-        v.z -= camera_pos.z;
-        Vec2D projected_point = project(v);
-        g_projected_points.push_back(projected_point);
+        std::vector<Vec2D> projected_points;
+        projected_points.reserve(3);
+        for (auto vertex : face_vertices)
+        {
+            vertex.Rotate(Axis::X_AXIS, cube_rotation.x);
+            vertex.Rotate(Axis::Y_AXIS, cube_rotation.y);
+            vertex.Rotate(Axis::Z_AXIS, cube_rotation.z);
+
+            // Move the point away from camera
+            vertex.z -= camera_pos.z;
+            Vec2D projected_point = project(vertex);
+            projected_point.x += g_display.GetWindowWidth() / 2;
+            projected_point.y += g_display.GetWindowHeight() / 2;
+            projected_points.push_back(projected_point);
+        }
+
+        Triangle triangle;
+        std::copy(projected_points.begin(), projected_points.end(), triangle.points);
+        triangles_to_render.push_back(triangle);
     }
 }
 
@@ -81,12 +90,11 @@ void render(void)
     g_display.ClearColorBuffer(0xFF000000);    
     g_display.DrawGrid();
 
-    for (auto v : g_projected_points)
+    for (auto triangle : triangles_to_render)
     {
-        Vec2D point = v;
-        g_display.DrawRect(v.x + g_display.GetWindowWidth()/2, 
-                           v.y + g_display.GetWindowHeight()/2, 
-                           4, 4, 0xFF0000FF);
+        g_display.DrawRect(triangle.points[0].x, triangle.points[0].y , 4, 4, 0xFF0000FF); 
+        g_display.DrawRect(triangle.points[1].x, triangle.points[1].y , 4, 4, 0xFF0000FF); 
+        g_display.DrawRect(triangle.points[2].x, triangle.points[2].y , 4, 4, 0xFF0000FF); 
     }
 
     g_display.RenderColorBuffer();
