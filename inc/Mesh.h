@@ -11,6 +11,8 @@ public:
     std::vector<Vec3D>& GetMeshVertices() { return mesh_vertices; }
     std::vector<Face>& GetMeshFaces() { return mesh_faces; }
 
+    void CreateCubeMesh();
+
 private:
     std::vector<Vec3D> mesh_vertices;
     std::vector<Face> mesh_faces;

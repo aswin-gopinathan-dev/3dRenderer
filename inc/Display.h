@@ -18,6 +18,8 @@ public:
     void DrawGrid();
     void DrawRect(int x, int y, int width, int height, uint32_t color);
     void DrawPixel(int x, int y, uint32_t color);
+    void DrawLine(int x0, int y0, int x1, int y1, uint32_t color);
+    void DrawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color);
     
 
     SDL_Renderer* GetRenderer() { return m_renderer; }

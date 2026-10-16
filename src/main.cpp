@@ -18,7 +18,7 @@ std::vector<Triangle> triangles_to_render;
 
 void setup()
 {
-    
+    g_mesh.CreateCubeMesh();
 }
 
 void process_input(void) 
@@ -95,6 +95,9 @@ void render(void)
         g_display.DrawRect(triangle.points[0].x, triangle.points[0].y , 4, 4, 0xFF0000FF); 
         g_display.DrawRect(triangle.points[1].x, triangle.points[1].y , 4, 4, 0xFF0000FF); 
         g_display.DrawRect(triangle.points[2].x, triangle.points[2].y , 4, 4, 0xFF0000FF); 
+        g_display.DrawTriangle(triangle.points[0].x, triangle.points[0].y, 
+                               triangle.points[1].x, triangle.points[1].y, 
+                               triangle.points[2].x, triangle.points[2].y, 0xFF0000FF);
     }
 
     g_display.RenderColorBuffer();

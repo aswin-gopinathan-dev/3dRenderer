@@ -2,6 +2,15 @@
 
 Mesh::Mesh()
 {
+
+}
+
+Mesh::~Mesh()
+{
+}
+
+void Mesh::CreateCubeMesh()
+{
     mesh_vertices.clear();
     mesh_vertices.push_back({-1, -1, -1});
     mesh_vertices.push_back({-1,  1, -1});
@@ -26,8 +35,3 @@ Mesh::Mesh()
     mesh_faces.push_back({6, 8, 1});
     mesh_faces.push_back({6, 1, 4});
 }
-
-Mesh::~Mesh()
-{
-}
-	
