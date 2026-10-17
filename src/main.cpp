@@ -18,7 +18,8 @@ std::vector<Triangle> triangles_to_render;
 
 void setup()
 {
-    g_mesh.CreateCubeMesh();
+    //g_mesh.CreateCubeMesh();
+    g_mesh.CreateMeshFromObjFile("./assets/f22.obj");
 }
 
 void process_input(void) 

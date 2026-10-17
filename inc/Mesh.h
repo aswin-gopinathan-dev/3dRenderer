@@ -12,6 +12,7 @@ public:
     std::vector<Face>& GetMeshFaces() { return mesh_faces; }
 
     void CreateCubeMesh();
+    void CreateMeshFromObjFile(std::string filename);
 
 private:
     std::vector<Vec3D> mesh_vertices;
