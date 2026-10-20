@@ -127,3 +127,76 @@ void Display::DrawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, uint3
     DrawLine(x1, y1, x2, y2, color);
     DrawLine(x2, y2, x0, y0, color);
 }
+
+
+void Display::FillFlatBottomTriangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
+{
+    // Slope equation is inverted as we need to find x for each increment of y
+    float slope1 = (float)(x1 - x0) / (y1 - y0);
+    float slope2 = (float)(x2 - x0) / (y2 - y0);
+
+    float x_start = x0;
+    float x_end = x0;
+    // Loop scanlines from top to bottom
+    for(int y = y0; y <= y1; y++)
+    {
+        DrawLine(x_start, y, x_end, y, color);
+        x_start += slope1;
+        x_end += slope2;
+    }
+}
+
+
+void Display::FillFlatTopTriangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
+{
+    // Slope equation is inverted as we need to find x for each increment of y
+    float slope1 = (float)(x2 - x0) / (y2 - y0);
+    float slope2 = (float)(x2 - x1) / (y2 - y1);
+
+    float x_start = x2;
+    float x_end = x2;
+    // Loop scanlines from top to bottom
+    for(int y = y2; y >= y0; y--)
+    {
+        DrawLine(x_start, y, x_end, y, color);
+        x_start -= slope1;
+        x_end -= slope2;
+    }
+}
+
+
+void Display::DrawFilledTriangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
+{
+    // Sort vertices by ascending Y coordinate
+    if (y0 > y1) {
+        std::swap(x0, x1);
+        std::swap(y0, y1);
+    }
+
+    if (y1 > y2) {
+        std::swap(x1, x2);
+        std::swap(y1, y2);
+    }
+
+    if (y0 > y1) {
+        std::swap(x0, x1);
+        std::swap(y0, y1);
+    }
+
+    if(y1 == y2)
+    {
+        FillFlatBottomTriangle(x0, y0, x1, y1, x2, y2, color);
+    }
+    else if(y0 == y1)
+    {
+        FillFlatTopTriangle(x0, y0, x1, y1, x2, y2, color);
+    }
+    else
+    {
+        int My = y1;
+        int Mx = (x2 - x0) * (y1 - y0) / (float)(y2 - y0) + x0;
+
+        FillFlatBottomTriangle(x0, y0, x1, y1, Mx, My, color);
+        FillFlatTopTriangle(x1, y1, Mx, My, x2, y2, color);
+    }
+}
