@@ -14,6 +14,59 @@ Vec2D::~Vec2D()
 {
 }
 
+float Vec2D::Magnitude()
+{
+    return sqrt(x*x + y*y);
+}
+
+Vec2D Vec2D::Add(Vec2D& v)
+{
+    Vec2D result;
+    result.x = x + v.x;
+    result.y = y + v.y;
+    return result;
+}
+
+Vec2D Vec2D::Sub(Vec2D& v)
+{
+    Vec2D result;
+    result.x = x - v.x;
+    result.y = y - v.y;
+    return result;
+}
+
+Vec2D Vec2D::Multiply(float s)
+{
+    Vec2D result;
+    result.x = x * s;
+    result.y = y * s;
+    return result;
+}
+
+
+Vec2D Vec2D::Div(float s)
+{
+    Vec2D result;
+    result.x = x / s;
+    result.y = y / s;
+    return result;
+}
+
+
+float Vec2D::Dot(Vec2D& v)
+{
+    float result = x * v.x + y * v.y;
+    return result;
+}
+
+void Vec2D::Normalize()
+{
+    float mag = Magnitude();
+    x = x / mag;
+    y = y / mag;
+}
+
+///////////////////////////////////////////////////////////////////////
 
 Vec3D::Vec3D() : x(0.0), y(0.0), z(0.0)
 {
@@ -51,4 +104,68 @@ void Vec3D::Rotate(Axis axis, float angle)
     }
     
     *this = result;
+}
+
+float Vec3D::Magnitude()
+{
+    return sqrt(x*x + y*y + z*z);
+}
+
+Vec3D Vec3D::Add(Vec3D& v)
+{
+    Vec3D result;
+    result.x = x + v.x;
+    result.y = y + v.y;
+    result.z = z + v.z;
+    return result;
+}
+
+Vec3D Vec3D::Sub(Vec3D& v)
+{
+    Vec3D result;
+    result.x = x - v.x;
+    result.y = y - v.y;
+    result.z = z - v.z;
+    return result;
+}
+
+Vec3D Vec3D::Multiply(float s)
+{
+    Vec3D result;
+    result.x = x * s;
+    result.y = y * s;
+    result.z = z * z;
+    return result;
+}
+
+Vec3D Vec3D::Div(float s)
+{
+    Vec3D result;
+    result.x = x / s;
+    result.y = y / s;
+    result.z = z / z;
+    return result;
+}
+
+Vec3D Vec3D::Cross(Vec3D& v)
+{
+    Vec3D result;
+    result.x = y * v.z - z * v.y;
+    result.y = z * v.x - x * v.z;
+    result.z = x * v.y - y * v.x;
+    return result;
+}
+
+float Vec3D::Dot(Vec3D& v)
+{
+    float result = x * v.x + y * v.y + z * v.z;
+    return result;
+}
+
+void Vec3D::Normalize()
+{
+    float mag = Magnitude();
+    x = x / mag;
+    y = y / mag;
+    z = z / mag;
 }
