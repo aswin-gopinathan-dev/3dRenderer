@@ -20,6 +20,8 @@ public:
 
     Vec2D points[3];
     uint32_t color;
+    double avg_depth;
+
 private:
 	
 };

@@ -143,8 +143,11 @@ void update(void)
         Triangle triangle;
         std::copy(projected_points.begin(), projected_points.end(), triangle.points);
         triangle.color = face.color;
+        triangle.avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3;
         triangles_to_render.push_back(triangle);
     }
+
+    std::sort(triangles_to_render.begin(), triangles_to_render.end(), [](Triangle a, Triangle b) { return a.avg_depth > b.avg_depth;});
 }
 
 
