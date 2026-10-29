@@ -24,11 +24,14 @@ public:
 
 enum class Axis {X_AXIS, Y_AXIS, Z_AXIS};
 
+class Vec4D;
+
 class Vec3D
 {
 public:
     Vec3D();
     Vec3D(float a, float b, float c);
+    Vec3D(Vec4D& v);
     ~Vec3D();
     void print(std::string msg = "") { std::cout << msg << " " << x << ", " << y << ", " << z << std::endl; }
 
@@ -45,4 +48,20 @@ public:
     float x;
     float y;
     float z;
+};
+
+class Vec4D
+{
+    public:
+        Vec4D();
+        Vec4D(float a, float b, float c, float d);
+        Vec4D(Vec3D v);
+        ~Vec4D();
+        void print(std::string msg = "") { std::cout << msg << " " << x << ", " << y << ", " << z << std::endl; }
+
+
+        float x;
+        float y;
+        float z;
+        float w;
 };

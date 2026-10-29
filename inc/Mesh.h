@@ -14,8 +14,12 @@ public:
     void CreateCubeMesh();
     void CreateMeshFromObjFile(std::string filename);
 
-private:
+//private:
     std::vector<Vec3D> mesh_vertices;
     std::vector<Face> mesh_faces;
+
+    Vec3D rotation;
+    Vec3D translation;
+    Vec3D scale;
 };
 	

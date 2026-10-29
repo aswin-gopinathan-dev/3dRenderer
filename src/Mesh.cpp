@@ -6,9 +6,8 @@
 #include <sstream>
 
 
-Mesh::Mesh()
+Mesh::Mesh() : translation(0, 0, 0), scale(1.0, 1.0, 1.0)
 {
-
 }
 
 Mesh::~Mesh()

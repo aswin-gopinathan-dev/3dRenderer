@@ -4,6 +4,7 @@
 #include "Vector.h"
 #include "Triangle.h"
 #include "Mesh.h"
+#include "Matrix.h"
 #include <vector>
 #include <algorithm>
 
@@ -11,7 +12,6 @@ bool is_running = true;
 Display g_display;
 Mesh g_mesh;
 Vec3D camera_pos {0, 0, 0};
-Vec3D cube_rotation {};
 float fov_factor = 640;
 std::vector<Triangle> triangles_to_render;
 
@@ -79,9 +79,30 @@ Vec2D project(Vec3D& pt)
 
 void update(void) 
 {
-    cube_rotation.x += 0.002;
-    cube_rotation.y += 0.002;
-    cube_rotation.z += 0.002;
+    g_mesh.rotation.x += 0.002;
+    g_mesh.rotation.y += 0.002;
+    g_mesh.rotation.z += 0.002;
+    //g_mesh.scale.x += 0.002;
+    //g_mesh.translation.x += 0.01;
+    g_mesh.translation.z = 5.0;
+
+    Matrix scale_matrix;
+    scale_matrix.Scale(g_mesh.scale.x, g_mesh.scale.y, g_mesh.scale.z);
+    Matrix translation_matrix;
+    translation_matrix.Translate(g_mesh.translation.x, g_mesh.translation.y, g_mesh.translation.z);
+    Matrix rotation_matrix_x;
+    rotation_matrix_x.RotateX(g_mesh.rotation.x);
+    Matrix rotation_matrix_y;
+    rotation_matrix_y.RotateY(g_mesh.rotation.y);
+    Matrix rotation_matrix_z;
+    rotation_matrix_z.RotateZ(g_mesh.rotation.z);
+
+    Matrix world_matrix;
+    world_matrix = world_matrix.Multiply(translation_matrix);
+    world_matrix = world_matrix.Multiply(rotation_matrix_x);
+    world_matrix = world_matrix.Multiply(rotation_matrix_y);
+    world_matrix = world_matrix.Multiply(rotation_matrix_z);
+    world_matrix = world_matrix.Multiply(scale_matrix);
 
     triangles_to_render.clear();
     std::vector<Vec3D> vertices = g_mesh.GetMeshVertices();
@@ -93,22 +114,17 @@ void update(void)
         face_vertices[1] = vertices[face.b-1];
         face_vertices[2] = vertices[face.c-1];
         
-        std::vector<Vec3D> transformed_vertices;
+        std::vector<Vec4D> transformed_vertices;
         transformed_vertices.reserve(3);
         for (auto vertex : face_vertices)
         {
-            vertex.Rotate(Axis::X_AXIS, cube_rotation.x);
-            vertex.Rotate(Axis::Y_AXIS, cube_rotation.y);
-            vertex.Rotate(Axis::Z_AXIS, cube_rotation.z);
-
-            // Move the point away from camera
-            vertex.z += 5;
-            transformed_vertices.push_back(vertex);
+            Vec4D transformed_vertex = world_matrix.Multiply(vertex);
+            transformed_vertices.push_back(transformed_vertex);
         }
 
         //Backface culling
         if(g_cullMethod == CullMethod::CULL_BACKFACE)
-        {
+         {
             Vec3D A = transformed_vertices[0];
             Vec3D B = transformed_vertices[1];
             Vec3D C = transformed_vertices[2];
@@ -134,7 +150,8 @@ void update(void)
         projected_points.reserve(3);
         for (auto vertex : transformed_vertices)        
         {
-            Vec2D projected_point = project(vertex);
+            Vec3D v3 = vertex;
+            Vec2D projected_point = project(v3);
             projected_point.x += g_display.GetWindowWidth() / 2;
             projected_point.y += g_display.GetWindowHeight() / 2;
             projected_points.push_back(projected_point);

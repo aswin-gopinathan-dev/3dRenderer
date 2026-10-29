@@ -77,6 +77,13 @@ Vec3D::Vec3D(float a, float b, float c) : x(a), y(b), z(c)
 
 }
 
+Vec3D::Vec3D(Vec4D& v)
+{
+    x = v.x;
+    y = v.y;
+    z = v.z;
+}
+
 Vec3D::~Vec3D()
 {
 }
@@ -169,3 +176,26 @@ void Vec3D::Normalize()
     y = y / mag;
     z = z / mag;
 }
+
+
+Vec4D::Vec4D() : x(0.0), y(0.0), z(0.0), w(0.0)
+{
+}
+
+Vec4D::Vec4D(float a, float b, float c, float d) : x(a), y(b), z(c), w(d)
+{
+
+}
+
+Vec4D::Vec4D(Vec3D v)
+{
+    x = v.x;
+    y = v.y;
+    z = v.z;
+    w = 1.0;
+}
+
+Vec4D::~Vec4D()
+{
+}
+
