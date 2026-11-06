@@ -101,3 +101,31 @@ Matrix Matrix::Multiply(Matrix& matrix)
 }
 
 
+Matrix Matrix::ProjectionMatrix(float fov, float aspect, float znear, float zfar)
+{
+    Matrix matrix;
+    matrix.m[0][0] = aspect * (1 / tan(fov/2));
+    matrix.m[1][1] = 1 / tan(fov/2);
+    matrix.m[2][2] = zfar / (zfar - znear);
+    matrix.m[2][3] = (-zfar * znear) / (zfar - znear);
+    matrix.m[3][2] = 1;
+    matrix.m[3][3] = 0;
+    
+    return matrix;
+}
+
+
+Vec4D Matrix::Project(Vec4D v)
+{
+    Vec4D result;
+    result = Multiply(v);
+    if(result.w != 0)
+    {
+        result.x /= result.w;
+        result.y /= result.w;
+        result.z /= result.w;
+    }
+
+
+    return result;
+}

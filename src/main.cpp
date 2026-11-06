@@ -12,7 +12,8 @@ bool is_running = true;
 Display g_display;
 Mesh g_mesh;
 Vec3D camera_pos {0, 0, 0};
-float fov_factor = 640;
+Matrix projection_matrix;
+
 std::vector<Triangle> triangles_to_render;
 
 enum class CullMethod
@@ -38,6 +39,12 @@ void setup()
     g_cullMethod = CullMethod::CULL_BACKFACE;
     g_mesh.CreateCubeMesh();
     //g_mesh.CreateMeshFromObjFile("./assets/cube.obj");
+
+    float fov = M_PI / 3.0;
+    float aspect = (float)g_display.GetWindowHeight() / g_display.GetWindowWidth();
+    float zfar = 100.0;
+    float znear = 0.1;
+    projection_matrix = projection_matrix.ProjectionMatrix(fov, aspect, znear, zfar);
 }
 
 void process_input(void) 
@@ -67,13 +74,6 @@ void process_input(void)
                 g_cullMethod = CullMethod::CULL_NONE;
             break;
     }
-}
-
-
-Vec2D project(Vec3D& pt)
-{
-    Vec2D v {fov_factor * pt.x / pt.z, fov_factor * pt.y / pt.z};
-    return v;
 }
 
 
@@ -151,10 +151,16 @@ void update(void)
         for (auto vertex : transformed_vertices)        
         {
             Vec3D v3 = vertex;
-            Vec2D projected_point = project(v3);
+            Vec4D projected_point = projection_matrix.Project(vertex);
+
+            projected_point.x *= (g_display.GetWindowWidth() / 2);
+            projected_point.y *= (g_display.GetWindowHeight() / 2);
+
             projected_point.x += g_display.GetWindowWidth() / 2;
             projected_point.y += g_display.GetWindowHeight() / 2;
-            projected_points.push_back(projected_point);
+
+            Vec2D point(projected_point.x, projected_point.y);
+            projected_points.push_back(point);
         }
 
         Triangle triangle;
