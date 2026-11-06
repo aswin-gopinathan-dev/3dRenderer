@@ -27,18 +27,18 @@ void Mesh::CreateCubeMesh()
     mesh_vertices.push_back({-1, -1,  1});
 
     mesh_faces.clear();
-    mesh_faces.push_back({1, 2, 3, 0xFFFF0000});
-    mesh_faces.push_back({1, 3, 4, 0xFFFF0000});
-    mesh_faces.push_back({4, 3, 5, 0xFF00FF00});
-    mesh_faces.push_back({4, 5, 6, 0xFF00FF00});
-    mesh_faces.push_back({6, 5, 7, 0xFF0000FF});
-    mesh_faces.push_back({6, 7, 8, 0xFF0000FF});
-    mesh_faces.push_back({8, 7, 2, 0xFFFFFF00});
-    mesh_faces.push_back({8, 2, 1, 0xFFFFFF00});
-    mesh_faces.push_back({2, 7, 5, 0xFFFF00FF});
-    mesh_faces.push_back({2, 5, 3, 0xFFFF00FF});
-    mesh_faces.push_back({6, 8, 1, 0xFF00FFFF});
-    mesh_faces.push_back({6, 1, 4, 0xFF00FFFF});
+    mesh_faces.push_back({1, 2, 3, 0xFFFFFFFF});
+    mesh_faces.push_back({1, 3, 4, 0xFFFFFFFF});
+    mesh_faces.push_back({4, 3, 5, 0xFFFFFFFF});
+    mesh_faces.push_back({4, 5, 6, 0xFFFFFFFF});
+    mesh_faces.push_back({6, 5, 7, 0xFFFFFFFF});
+    mesh_faces.push_back({6, 7, 8, 0xFFFFFFFF});
+    mesh_faces.push_back({8, 7, 2, 0xFFFFFFFF});
+    mesh_faces.push_back({8, 2, 1, 0xFFFFFFFF});
+    mesh_faces.push_back({2, 7, 5, 0xFFFFFFFF});
+    mesh_faces.push_back({2, 5, 3, 0xFFFFFFFF});
+    mesh_faces.push_back({6, 8, 1, 0xFFFFFFFF});
+    mesh_faces.push_back({6, 1, 4, 0xFFFFFFFF});
 }
 
 void Mesh::CreateMeshFromObjFile(std::string filename)
@@ -71,6 +71,7 @@ void Mesh::CreateMeshFromObjFile(std::string filename)
                     >> face.b >> slash >> temp >> slash >> temp
                     >> face.c >> slash >> temp >> slash >> temp)
             {
+                face.color = 0xFFFFFFFF;
                 mesh_faces.push_back(face);
             }
         }

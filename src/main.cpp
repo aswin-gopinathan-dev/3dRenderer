@@ -5,6 +5,7 @@
 #include "Triangle.h"
 #include "Mesh.h"
 #include "Matrix.h"
+#include "Light.h"
 #include <vector>
 #include <algorithm>
 
@@ -13,6 +14,7 @@ Display g_display;
 Mesh g_mesh;
 Vec3D camera_pos {0, 0, 0};
 Matrix projection_matrix;
+Light g_light(Vec3D(0, 0, 1));
 
 std::vector<Triangle> triangles_to_render;
 
@@ -37,8 +39,8 @@ void setup()
 {
     g_renderMethod = RenderMethod::RENDER_WIRE;
     g_cullMethod = CullMethod::CULL_BACKFACE;
-    g_mesh.CreateCubeMesh();
-    //g_mesh.CreateMeshFromObjFile("./assets/cube.obj");
+    //g_mesh.CreateCubeMesh();
+    g_mesh.CreateMeshFromObjFile("./assets/f22.obj");
 
     float fov = M_PI / 3.0;
     float aspect = (float)g_display.GetWindowHeight() / g_display.GetWindowWidth();
@@ -123,24 +125,24 @@ void update(void)
         }
 
         //Backface culling
+        Vec3D A = transformed_vertices[0];
+        Vec3D B = transformed_vertices[1];
+        Vec3D C = transformed_vertices[2];
+        Vec3D AB = B.Sub(A);
+        Vec3D AC = C.Sub(A);
+
+        // Get face normal
+        Vec3D normal = AB.Cross(AC);
+        normal.Normalize();
+
+        // Find camera ray
+        Vec3D camera_ray = camera_pos.Sub(A);
+
+        // Find how aligned is camera ray with face normal
+        float dot = camera_ray.Dot(normal);
+
         if(g_cullMethod == CullMethod::CULL_BACKFACE)
-         {
-            Vec3D A = transformed_vertices[0];
-            Vec3D B = transformed_vertices[1];
-            Vec3D C = transformed_vertices[2];
-            Vec3D AB = B.Sub(A);
-            Vec3D AC = C.Sub(A);
-
-            // Get face normal
-            Vec3D normal = AB.Cross(AC);
-            normal.Normalize();
-
-            // Find camera ray
-            Vec3D camera_ray = camera_pos.Sub(A);
-
-            // Find how aligned is camera ray with face normal
-            float dot = camera_ray.Dot(normal);
-
+        {
             if(dot < 0)
                 continue;
         }
@@ -156,6 +158,9 @@ void update(void)
             projected_point.x *= (g_display.GetWindowWidth() / 2);
             projected_point.y *= (g_display.GetWindowHeight() / 2);
 
+            // Invert y values to account for flipped screen y coordinate (compared to obj)
+            projected_point.y *= -1;
+
             projected_point.x += g_display.GetWindowWidth() / 2;
             projected_point.y += g_display.GetWindowHeight() / 2;
 
@@ -165,7 +170,11 @@ void update(void)
 
         Triangle triangle;
         std::copy(projected_points.begin(), projected_points.end(), triangle.points);
-        triangle.color = face.color;
+
+        float light_intensity_factor = -normal.Dot(g_light.direction);
+        uint32_t triangle_color = g_light.GetLightIntensity(face.color, light_intensity_factor);
+
+        triangle.color = triangle_color;
         triangle.avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3;
         triangles_to_render.push_back(triangle);
     }
