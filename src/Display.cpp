@@ -200,3 +200,112 @@ void Display::DrawFilledTriangle(int x0, int y0, int x1, int y1, int x2, int y2,
         FillFlatTopTriangle(x1, y1, Mx, My, x2, y2, color);
     }
 }
+
+
+void Display::DrawTexel(int x, int y, uint32_t* texture, Vec2D point_a, Vec2D point_b, Vec2D point_c,
+                        Texture uv0, Texture uv1, Texture uv2)
+{
+    Vec2D point_p(x, y);
+    Vec3D weights = BarycentricWeights(point_a, point_b, point_c, point_p);
+    float alpha = weights.x;
+    float beta = weights.y;
+    float gamma = weights.z;
+
+    float interpolated_u = uv0.u * alpha + uv1.u * beta + uv2.u * gamma;
+    float interpolated_v = uv0.v * alpha + uv1.v * beta + uv2.v * gamma;
+
+    int tex_x = abs((int)(interpolated_u * uv0.width));
+    int tex_y = abs((int)(interpolated_v * uv0.width));
+    if(tex_x >=0 && tex_y >= 0 && tex_x < uv0.width && tex_y < uv0.height)
+        DrawPixel(x, y, texture[tex_x * uv0.width + tex_y]);
+}
+
+
+void Display::DrawTexturedTriangle(int x0, int y0, Texture uv0, int x1, int y1, Texture uv1, int x2, int y2, Texture uv2, uint32_t* texture)
+{
+    // Sort vertices by ascending Y coordinate
+    if (y0 > y1) {
+        std::swap(x0, x1);
+        std::swap(y0, y1);
+        std::swap(uv0, uv1);
+    }
+
+    if (y1 > y2) {
+        std::swap(x1, x2);
+        std::swap(y1, y2);
+        std::swap(uv1, uv2);
+    }
+
+    if (y0 > y1) {
+        std::swap(x0, x1);
+        std::swap(y0, y1);
+        std::swap(uv0, uv1);
+    }
+
+    Vec2D point_a(x0, y0);
+    Vec2D point_b(x1, y1);
+    Vec2D point_c(x2, y2);
+
+    float inv_slope1 = 0;
+    float inv_slope2 = 0;
+
+    if (y1 - y0 != 0) inv_slope1 = (float)(x1 - x0) / abs(y1 - y0);
+    if( y2 - y0 !=0 ) inv_slope2 = (float)(x2 - x0) / abs(y2 - y0);
+
+    if(y1 - y0 != 0)
+    {
+        for(int y = y0; y <= y1; y++)
+        {
+            int x_start = x1 + (y - y1) * inv_slope1;
+            int x_end = x0 + (y - y0) * inv_slope2;
+            if(x_end < x_start)
+                std::swap(x_start, x_end);
+
+            for(int x = x_start; x < x_end; x++)
+            {
+                DrawTexel(x, y, texture, point_a, point_b, point_c, uv0, uv1, uv2);
+            }
+        }
+    }
+
+
+    inv_slope1 = 0;
+    inv_slope2 = 0;
+
+    if (y2 - y1 != 0) inv_slope1 = (float)(x2 - x1) / abs(y2 - y1);
+    if( y2 - y0 !=0 ) inv_slope2 = (float)(x2 - x0) / abs(y2 - y0);
+
+    if(y2 - y1 != 0)
+    {
+        for(int y = y1; y <= y2; y++)
+        {
+            int x_start = x1 + (y - y1) * inv_slope1;
+            int x_end = x0 + (y - y0) * inv_slope2;
+            if(x_end < x_start)
+                std::swap(x_start, x_end);
+
+            for(int x = x_start; x < x_end; x++)
+            {
+                DrawTexel(x, y, texture, point_a, point_b, point_c, uv0, uv1, uv2);
+            }
+        }
+    }
+}
+
+
+Vec3D Display::BarycentricWeights(Vec2D a, Vec2D b, Vec2D c, Vec2D p)
+{
+    Vec2D ac = c.Sub(a);
+    Vec2D ab = b.Sub(a);
+    Vec2D pc = c.Sub(p);
+    Vec2D pb = b.Sub(p);
+    Vec2D ap = p.Sub(a);
+
+    float area_parallelogram_abc = (ac.x*ab.y - ac.y*ab.x);
+    float alpha = (pc.x * pb.y - pc.y * pb.x) / area_parallelogram_abc;
+    float beta = (ac.x * ap.y - ac.y * ap.x) / area_parallelogram_abc;
+    float gamma = 1.0 - alpha - beta;
+
+    Vec3D weights(alpha, beta, gamma);
+    return weights;
+}

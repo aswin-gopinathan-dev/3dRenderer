@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "Matrix.h"
 #include "Light.h"
+#include "Texture.h"
 #include <vector>
 #include <algorithm>
 
@@ -29,7 +30,9 @@ enum class RenderMethod
     RENDER_WIRE,
     RENDER_WIRE_VERTEX,
     RENDER_FILL_TRIANGLE,
-    RENDER_FILL_TRIANGLE_WIRE
+    RENDER_FILL_TRIANGLE_WIRE,
+    RENDER_TEXTURED,
+    RENDER_TEXTURED_WIRE
 };
 
 CullMethod g_cullMethod;
@@ -39,8 +42,9 @@ void setup()
 {
     g_renderMethod = RenderMethod::RENDER_WIRE;
     g_cullMethod = CullMethod::CULL_BACKFACE;
-    //g_mesh.CreateCubeMesh();
-    g_mesh.CreateMeshFromObjFile("./assets/f22.obj");
+    g_mesh.CreateCubeMesh();
+    //g_mesh.CreateMeshFromObjFile("./assets/f22.obj");
+    mesh_texture = (uint32_t*)REDBRICK_TEXTURE;
 
     float fov = M_PI / 3.0;
     float aspect = (float)g_display.GetWindowHeight() / g_display.GetWindowWidth();
@@ -70,6 +74,10 @@ void process_input(void)
                 g_renderMethod = RenderMethod::RENDER_FILL_TRIANGLE;
             if (event.key.keysym.sym == SDLK_4)
                 g_renderMethod = RenderMethod::RENDER_FILL_TRIANGLE_WIRE;
+            if (event.key.keysym.sym == SDLK_5)
+                g_renderMethod = RenderMethod::RENDER_TEXTURED;
+            if (event.key.keysym.sym == SDLK_6)
+                g_renderMethod = RenderMethod::RENDER_TEXTURED_WIRE;
             if (event.key.keysym.sym == SDLK_c)
                 g_cullMethod = CullMethod::CULL_BACKFACE;
             if (event.key.keysym.sym == SDLK_d)
@@ -81,9 +89,9 @@ void process_input(void)
 
 void update(void) 
 {
-    g_mesh.rotation.x += 0.002;
-    g_mesh.rotation.y += 0.002;
-    g_mesh.rotation.z += 0.002;
+    g_mesh.rotation.x += 0.005;
+    g_mesh.rotation.y += 0.005;
+    g_mesh.rotation.z += 0.005;
     //g_mesh.scale.x += 0.002;
     //g_mesh.translation.x += 0.01;
     g_mesh.translation.z = 5.0;
@@ -175,6 +183,9 @@ void update(void)
         uint32_t triangle_color = g_light.GetLightIntensity(face.color, light_intensity_factor);
 
         triangle.color = triangle_color;
+        triangle.tex[0] = face.a_uv;
+        triangle.tex[1] = face.b_uv;
+        triangle.tex[2] = face.c_uv;
         triangle.avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3;
         triangles_to_render.push_back(triangle);
     }
@@ -201,12 +212,22 @@ void render(void)
 
         if(g_renderMethod == RenderMethod::RENDER_WIRE || 
            g_renderMethod == RenderMethod::RENDER_WIRE_VERTEX || 
-           g_renderMethod == RenderMethod::RENDER_FILL_TRIANGLE_WIRE)
+           g_renderMethod == RenderMethod::RENDER_FILL_TRIANGLE_WIRE || 
+           g_renderMethod == RenderMethod::RENDER_TEXTURED_WIRE)
         {
             g_display.DrawTriangle(triangle.points[0].x, triangle.points[0].y, 
                                    triangle.points[1].x, triangle.points[1].y, 
                                    triangle.points[2].x, triangle.points[2].y, 
                                    0xFFFFFFFF);
+        }
+
+        if(g_renderMethod == RenderMethod::RENDER_TEXTURED || 
+           g_renderMethod == RenderMethod::RENDER_TEXTURED_WIRE)
+        {
+            g_display.DrawTexturedTriangle(triangle.points[0].x, triangle.points[0].y, triangle.tex[0], 
+                                           triangle.points[1].x, triangle.points[1].y, triangle.tex[1], 
+                                           triangle.points[2].x, triangle.points[2].y, triangle.tex[2], 
+                                           mesh_texture);
         }
 
         if(g_renderMethod == RenderMethod::RENDER_WIRE_VERTEX)

@@ -27,18 +27,18 @@ void Mesh::CreateCubeMesh()
     mesh_vertices.push_back({-1, -1,  1});
 
     mesh_faces.clear();
-    mesh_faces.push_back({1, 2, 3, 0xFFFFFFFF});
-    mesh_faces.push_back({1, 3, 4, 0xFFFFFFFF});
-    mesh_faces.push_back({4, 3, 5, 0xFFFFFFFF});
-    mesh_faces.push_back({4, 5, 6, 0xFFFFFFFF});
-    mesh_faces.push_back({6, 5, 7, 0xFFFFFFFF});
-    mesh_faces.push_back({6, 7, 8, 0xFFFFFFFF});
-    mesh_faces.push_back({8, 7, 2, 0xFFFFFFFF});
-    mesh_faces.push_back({8, 2, 1, 0xFFFFFFFF});
-    mesh_faces.push_back({2, 7, 5, 0xFFFFFFFF});
-    mesh_faces.push_back({2, 5, 3, 0xFFFFFFFF});
-    mesh_faces.push_back({6, 8, 1, 0xFFFFFFFF});
-    mesh_faces.push_back({6, 1, 4, 0xFFFFFFFF});
+    mesh_faces.push_back({1, 2, 3, Texture{0, 0}, Texture{0, 1}, Texture{1, 1}, 0xFFFFFFFF});
+    mesh_faces.push_back({1, 3, 4, Texture{0, 0}, Texture{1, 1}, Texture{1, 0}, 0xFFFFFFFF});
+    mesh_faces.push_back({4, 3, 5, Texture{0, 0}, Texture{0, 1}, Texture{1, 1}, 0xFFFFFFFF});
+    mesh_faces.push_back({4, 5, 6, Texture{0, 0}, Texture{1, 1}, Texture{1, 0}, 0xFFFFFFFF});
+    mesh_faces.push_back({6, 5, 7, Texture{0, 0}, Texture{0, 1}, Texture{1, 1}, 0xFFFFFFFF});
+    mesh_faces.push_back({6, 7, 8, Texture{0, 0}, Texture{1, 1}, Texture{1, 0}, 0xFFFFFFFF});
+    mesh_faces.push_back({8, 7, 2, Texture{0, 0}, Texture{0, 1}, Texture{1, 1}, 0xFFFFFFFF});
+    mesh_faces.push_back({8, 2, 1, Texture{0, 0}, Texture{1, 1}, Texture{1, 0}, 0xFFFFFFFF});
+    mesh_faces.push_back({2, 7, 5, Texture{0, 0}, Texture{0, 1}, Texture{1, 1}, 0xFFFFFFFF});
+    mesh_faces.push_back({2, 5, 3, Texture{0, 0}, Texture{1, 1}, Texture{1, 0}, 0xFFFFFFFF});
+    mesh_faces.push_back({6, 8, 1, Texture{0, 0}, Texture{0, 1}, Texture{1, 1}, 0xFFFFFFFF});
+    mesh_faces.push_back({6, 1, 4, Texture{0, 0}, Texture{1, 1}, Texture{1, 0}, 0xFFFFFFFF});
 }
 
 void Mesh::CreateMeshFromObjFile(std::string filename)
@@ -63,7 +63,7 @@ void Mesh::CreateMeshFromObjFile(std::string filename)
         }
         else if (prefix == "f") 
         {
-            Face face {0, 0, 0, 0xFFFFFFFF};
+            Face face {0, 0, 0, Texture(), Texture(), Texture(), 0xFFFFFFFF};
             char slash;
             float temp;
             
