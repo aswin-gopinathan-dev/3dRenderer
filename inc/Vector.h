@@ -2,11 +2,14 @@
 #include <string>
 #include <iostream>
 
+class Vec4D;
+
 class Vec2D
 {
 public:
 	Vec2D();
     Vec2D(float a, float b);
+    Vec2D(Vec4D& v);
 	~Vec2D();
     void print(std::string msg = "") { std::cout << msg << " " << x << ", " << y << std::endl; }    
 
@@ -55,6 +58,7 @@ class Vec4D
     public:
         Vec4D();
         Vec4D(float a, float b, float c, float d);
+        Vec4D(Vec2D v);
         Vec4D(Vec3D v);
         ~Vec4D();
         void print(std::string msg = "") { std::cout << msg << " " << x << ", " << y << ", " << z << std::endl; }

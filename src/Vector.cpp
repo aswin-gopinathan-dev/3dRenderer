@@ -10,6 +10,13 @@ Vec2D::Vec2D(float a, float b) : x(a), y(b)
 
 }
 
+Vec2D::Vec2D(Vec4D& v)
+{
+    x = v.x;
+    y = v.y;
+}
+
+
 Vec2D::~Vec2D()
 {
 }
@@ -185,6 +192,14 @@ Vec4D::Vec4D() : x(0.0), y(0.0), z(0.0), w(0.0)
 Vec4D::Vec4D(float a, float b, float c, float d) : x(a), y(b), z(c), w(d)
 {
 
+}
+
+Vec4D::Vec4D(Vec2D v)
+{
+    x = v.x;
+    y = v.y;
+    z = 0.0;
+    w = 1.0;
 }
 
 Vec4D::Vec4D(Vec3D v)

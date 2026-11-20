@@ -23,11 +23,11 @@ public:
     void DrawLine(int x0, int y0, int x1, int y1, uint32_t color);
     void DrawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color);
     void DrawFilledTriangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color);
-    void DrawTexturedTriangle(int x0, int y0, Texture uv0, int x1, int y1, Texture uv1, int x2, int y2, Texture uv2, uint32_t* texture);
+    void DrawTexturedTriangle(int x0, int y0, float z0, float w0, Texture uv0, int x1, int y1, float z1, float w1, Texture uv1, int x2, int y2, float z2, float w2, Texture uv2, uint32_t* texture);
     void FillFlatBottomTriangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color);
     void FillFlatTopTriangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color);
     Vec3D BarycentricWeights(Vec2D a, Vec2D b, Vec2D c, Vec2D p);
-    void DrawTexel(int x, int y, uint32_t* texture, Vec2D point_a, Vec2D point_b, Vec2D point_c,
+    void DrawTexel(int x, int y, uint32_t* texture, Vec4D point_a, Vec4D point_b, Vec4D point_c,
                    Texture uv0, Texture uv1, Texture uv2);
     
 

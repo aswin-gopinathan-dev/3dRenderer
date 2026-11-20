@@ -202,18 +202,25 @@ void Display::DrawFilledTriangle(int x0, int y0, int x1, int y1, int x2, int y2,
 }
 
 
-void Display::DrawTexel(int x, int y, uint32_t* texture, Vec2D point_a, Vec2D point_b, Vec2D point_c,
+void Display::DrawTexel(int x, int y, uint32_t* texture, Vec4D point_a, Vec4D point_b, Vec4D point_c,
                         Texture uv0, Texture uv1, Texture uv2)
 {
-    Vec2D point_p(x, y);
-    Vec3D weights = BarycentricWeights(point_a, point_b, point_c, point_p);
+    Vec2D p(x, y);
+    Vec2D a(point_a);
+    Vec2D b(point_b);
+    Vec2D c(point_c);
+    Vec3D weights = BarycentricWeights(a, b, c, p);
     float alpha = weights.x;
     float beta = weights.y;
     float gamma = weights.z;
 
-    float interpolated_u = uv0.u * alpha + uv1.u * beta + uv2.u * gamma;
-    float interpolated_v = uv0.v * alpha + uv1.v * beta + uv2.v * gamma;
-
+    float interpolated_u = (uv0.u/point_a.w) * alpha + (uv1.u/point_b.w) * beta + (uv2.u/point_c.w) * gamma;
+    float interpolated_v = (uv0.v/point_a.w) * alpha + (uv1.v/point_b.w) * beta + (uv2.v/point_c.w) * gamma;
+    
+    float interpolated_reciprocal_w = (1/point_a.w) * alpha + (1/point_b.w) * beta + (1/point_c.w) * gamma;
+    interpolated_u /= interpolated_reciprocal_w;
+    interpolated_v /= interpolated_reciprocal_w;
+ 
     int tex_x = abs((int)(interpolated_u * uv0.width));
     int tex_y = abs((int)(interpolated_v * uv0.width));
     if(tex_x >=0 && tex_y >= 0 && tex_x < uv0.width && tex_y < uv0.height)
@@ -221,30 +228,36 @@ void Display::DrawTexel(int x, int y, uint32_t* texture, Vec2D point_a, Vec2D po
 }
 
 
-void Display::DrawTexturedTriangle(int x0, int y0, Texture uv0, int x1, int y1, Texture uv1, int x2, int y2, Texture uv2, uint32_t* texture)
+void Display::DrawTexturedTriangle(int x0, int y0, float z0, float w0, Texture uv0, int x1, int y1, float z1, float w1, Texture uv1, int x2, int y2, float z2, float w2, Texture uv2, uint32_t* texture)
 {
     // Sort vertices by ascending Y coordinate
     if (y0 > y1) {
         std::swap(x0, x1);
         std::swap(y0, y1);
+        std::swap(z0, z1);
+        std::swap(w0, w1);
         std::swap(uv0, uv1);
     }
 
     if (y1 > y2) {
         std::swap(x1, x2);
         std::swap(y1, y2);
+        std::swap(z1, z2);
+        std::swap(w1, w2);
         std::swap(uv1, uv2);
     }
 
     if (y0 > y1) {
         std::swap(x0, x1);
         std::swap(y0, y1);
+        std::swap(z0, z1);
+        std::swap(w0, w1);
         std::swap(uv0, uv1);
     }
 
-    Vec2D point_a(x0, y0);
-    Vec2D point_b(x1, y1);
-    Vec2D point_c(x2, y2);
+    Vec4D point_a(x0, y0, z0, w0);
+    Vec4D point_b(x1, y1, z1, w1);
+    Vec4D point_c(x2, y2, z2, w2);
 
     float inv_slope1 = 0;
     float inv_slope2 = 0;

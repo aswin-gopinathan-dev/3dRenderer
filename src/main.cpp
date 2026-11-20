@@ -156,7 +156,7 @@ void update(void)
         }
 
         // Project vertices
-        std::vector<Vec2D> projected_points;
+        std::vector<Vec4D> projected_points;
         projected_points.reserve(3);
         for (auto vertex : transformed_vertices)        
         {
@@ -172,7 +172,7 @@ void update(void)
             projected_point.x += g_display.GetWindowWidth() / 2;
             projected_point.y += g_display.GetWindowHeight() / 2;
 
-            Vec2D point(projected_point.x, projected_point.y);
+            Vec4D point(projected_point.x, projected_point.y, projected_point.z, projected_point.w);
             projected_points.push_back(point);
         }
 
@@ -224,9 +224,9 @@ void render(void)
         if(g_renderMethod == RenderMethod::RENDER_TEXTURED || 
            g_renderMethod == RenderMethod::RENDER_TEXTURED_WIRE)
         {
-            g_display.DrawTexturedTriangle(triangle.points[0].x, triangle.points[0].y, triangle.tex[0], 
-                                           triangle.points[1].x, triangle.points[1].y, triangle.tex[1], 
-                                           triangle.points[2].x, triangle.points[2].y, triangle.tex[2], 
+            g_display.DrawTexturedTriangle(triangle.points[0].x, triangle.points[0].y, triangle.points[0].z, triangle.points[0].w, triangle.tex[0], 
+                                           triangle.points[1].x, triangle.points[1].y, triangle.points[1].z, triangle.points[1].w, triangle.tex[1], 
+                                           triangle.points[2].x, triangle.points[2].y, triangle.points[2].z, triangle.points[2].w, triangle.tex[2], 
                                            mesh_texture);
         }
 

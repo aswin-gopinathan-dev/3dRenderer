@@ -3,16 +3,12 @@
     "configurations": [
         {
             "name": "Debug 3dRenderer",
-            "type": "cppdbg",
+            "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/build/main",
             "args": [],
-            "stopAtEntry": false,
+            "stopOnEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "miDebuggerPath": "/usr/bin/gdb",
             "preLaunchTask": "Build 3dRenderer"
         }
     ]
