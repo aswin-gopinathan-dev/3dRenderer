@@ -44,36 +44,69 @@ void Mesh::CreateCubeMesh()
 void Mesh::CreateMeshFromObjFile(std::string filename)
 {
     std::ifstream file(filename);
-    if(!file.is_open())
+
+    if (!file.is_open())
         throw std::runtime_error("Failed to open file: " + filename);
 
     mesh_vertices.clear();
+    mesh_faces.clear();
+
+    std::vector<Texture> texcoords;
+
     std::string line;
-    while(std::getline(file, line))
+
+    while (std::getline(file, line))
     {
         std::istringstream iss(line);
         std::string prefix;
+
         iss >> prefix;
 
-        if (prefix == "v") {
-            Vec3D vertex;
-            if (iss >> vertex.x >> vertex.y >> vertex.z) {
-                mesh_vertices.push_back(vertex);
-            }
-        }
-        else if (prefix == "f") 
+        if (prefix == "v")
         {
-            Face face {0, 0, 0, Texture(), Texture(), Texture(), 0xFFFFFFFF};
+            Vec3D vertex;
+
+            if (iss >> vertex.x >> vertex.y >> vertex.z)
+                mesh_vertices.push_back(vertex);
+        }
+        else if (prefix == "vt")
+        {
+            float u, v;
+
+            if (iss >> u >> v)
+                texcoords.emplace_back(u, v);
+        }
+        else if (prefix == "f")
+        {
+            int vi[3], ti[3], ni[3];
             char slash;
-            float temp;
-            
-            if (iss >> face.a >> slash >> temp >> slash >> temp
-                    >> face.b >> slash >> temp >> slash >> temp
-                    >> face.c >> slash >> temp >> slash >> temp)
+
+            bool valid = true;
+
+            for (int i = 0; i < 3; i++)
             {
-                face.color = 0xFFFFFFFF;
-                mesh_faces.push_back(face);
+                if (!(iss >> vi[i] >> slash >> ti[i]
+                          >> slash >> ni[i]))
+                {
+                    valid = false;
+                    break;
+                }
             }
+
+            if (!valid)
+                continue;
+
+            Face face {
+                vi[0],
+                vi[1],
+                vi[2],
+                texcoords.at(ti[0] - 1),
+                texcoords.at(ti[1] - 1),
+                texcoords.at(ti[2] - 1),
+                0xFFFFFFFF
+            };
+
+            mesh_faces.push_back(face);
         }
     }
 }

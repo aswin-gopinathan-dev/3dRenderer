@@ -32,7 +32,7 @@ Display::Display()
 
     // Create color buffer and SDL Texture
     m_colorBuffer = new uint32_t[m_windowWidth * m_windowHeight];
-    m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
+    m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
                                              m_windowWidth, m_windowHeight);
 }
 
@@ -222,9 +222,9 @@ void Display::DrawTexel(int x, int y, uint32_t* texture, Vec4D point_a, Vec4D po
     interpolated_v /= interpolated_reciprocal_w;
  
     int tex_x = abs((int)(interpolated_u * uv0.width));
-    int tex_y = abs((int)(interpolated_v * uv0.width));
+    int tex_y = abs((int)(interpolated_v * uv0.height));
     if(tex_x >=0 && tex_y >= 0 && tex_x < uv0.width && tex_y < uv0.height)
-        DrawPixel(x, y, texture[tex_x * uv0.width + tex_y]);
+        DrawPixel(x, y, texture[tex_y * uv0.width + tex_x]);
 }
 
 
@@ -254,6 +254,11 @@ void Display::DrawTexturedTriangle(int x0, int y0, float z0, float w0, Texture u
         std::swap(w0, w1);
         std::swap(uv0, uv1);
     }
+
+    // flip v component to account for iverted uv coordinates from obj file
+    uv0.v = 1 - uv0.v;
+    uv1.v = 1 - uv1.v;
+    uv2.v = 1 - uv2.v;
 
     Vec4D point_a(x0, y0, z0, w0);
     Vec4D point_b(x1, y1, z1, w1);

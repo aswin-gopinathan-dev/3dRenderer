@@ -9,6 +9,7 @@
 #include "Texture.h"
 #include <vector>
 #include <algorithm>
+#include "upng.h"
 
 bool is_running = true;
 Display g_display;
@@ -16,6 +17,7 @@ Mesh g_mesh;
 Vec3D camera_pos {0, 0, 0};
 Matrix projection_matrix;
 Light g_light(Vec3D(0, 0, 1));
+TextureData g_textureData;
 
 std::vector<Triangle> triangles_to_render;
 
@@ -42,9 +44,12 @@ void setup()
 {
     g_renderMethod = RenderMethod::RENDER_WIRE;
     g_cullMethod = CullMethod::CULL_BACKFACE;
-    g_mesh.CreateCubeMesh();
-    //g_mesh.CreateMeshFromObjFile("./assets/f22.obj");
-    mesh_texture = (uint32_t*)REDBRICK_TEXTURE;
+    //g_mesh.CreateCubeMesh();
+    g_mesh.CreateMeshFromObjFile("./assets/f22.obj");
+    const char* asset = "./assets/f22.png";
+    g_textureData.LoadTextureData(asset);
+    mesh_texture = g_textureData.mesh_texture;
+     
 
     float fov = M_PI / 3.0;
     float aspect = (float)g_display.GetWindowHeight() / g_display.GetWindowWidth();
