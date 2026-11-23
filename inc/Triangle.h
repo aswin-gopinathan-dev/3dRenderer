@@ -25,7 +25,6 @@ public:
     Vec4D points[3];
     Texture tex[3];
     uint32_t color;
-    double avg_depth;
 
 private:
 	

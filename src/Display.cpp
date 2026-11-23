@@ -32,6 +32,7 @@ Display::Display()
 
     // Create color buffer and SDL Texture
     m_colorBuffer = new uint32_t[m_windowWidth * m_windowHeight];
+    m_zBuffer = new float[m_windowWidth * m_windowHeight];
     m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
                                              m_windowWidth, m_windowHeight);
 }
@@ -44,6 +45,17 @@ Display::~Display()
     SDL_DestroyRenderer(m_renderer);
     //SDL_DestroyWindow(m_window);
     SDL_Quit();
+}
+
+void Display::ClearZBuffer()
+{
+    for (int y = 0; y < m_windowHeight; y++) 
+    {
+        for (int x = 0; x < m_windowWidth; x++) 
+        {
+            m_zBuffer[(m_windowWidth * y) + x] = 1.0;
+        }
+    }
 }
 
 
@@ -165,39 +177,101 @@ void Display::FillFlatTopTriangle(int x0, int y0, int x1, int y1, int x2, int y2
 }
 
 
-void Display::DrawFilledTriangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
+void Display::DrawTrianglePixel(int x, int y, uint32_t color, Vec4D point_a, Vec4D point_b, Vec4D point_c)
 {
+    if (x < 0 || x >= m_windowWidth || y < 0 || y >= m_windowHeight)
+        return;
+
+    Vec2D p(x, y);
+    Vec2D a(point_a);
+    Vec2D b(point_b);
+    Vec2D c(point_c);
+    Vec3D weights = BarycentricWeights(a, b, c, p);
+    float alpha = weights.x;
+    float beta = weights.y;
+    float gamma = weights.z;
+
+    float interpolated_reciprocal_w = (1/point_a.w) * alpha + (1/point_b.w) * beta + (1/point_c.w) * gamma;
+    interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
+    if(interpolated_reciprocal_w < m_zBuffer[m_windowWidth * y + x])
+    {
+        DrawPixel(x, y, color);
+        m_zBuffer[m_windowWidth * y + x] = interpolated_reciprocal_w;
+    }
+}
+
+
+void Display::DrawFilledTriangle(Vec4D v0, Vec4D v1, Vec4D v2, uint32_t color)
+{
+    v0.x = static_cast<int>(v0.x);
+    v0.y = static_cast<int>(v0.y);
+
+    v1.x = static_cast<int>(v1.x);
+    v1.y = static_cast<int>(v1.y);
+
+    v2.x = static_cast<int>(v2.x);
+    v2.y = static_cast<int>(v2.y);
+
     // Sort vertices by ascending Y coordinate
-    if (y0 > y1) {
-        std::swap(x0, x1);
-        std::swap(y0, y1);
+    if (v0.y > v1.y) {
+        std::swap(v0, v1);
     }
 
-    if (y1 > y2) {
-        std::swap(x1, x2);
-        std::swap(y1, y2);
+    if (v1.y > v2.y) {
+        std::swap(v1, v2);
     }
 
-    if (y0 > y1) {
-        std::swap(x0, x1);
-        std::swap(y0, y1);
+    if (v0.y > v1.y) {
+        std::swap(v0, v1);
     }
 
-    if(y1 == y2)
+    Vec4D point_a(v0);
+    Vec4D point_b(v1);
+    Vec4D point_c(v2);
+
+    float inv_slope1 = 0;
+    float inv_slope2 = 0;
+
+    if (v1.y - v0.y != 0) inv_slope1 = (float)(v1.x - v0.x) / abs(v1.y - v0.y);
+    if( v2.y - v0.y !=0 ) inv_slope2 = (float)(v2.x - v0.x) / abs(v2.y - v0.y);
+
+    if(v1.y - v0.y != 0)
     {
-        FillFlatBottomTriangle(x0, y0, x1, y1, x2, y2, color);
-    }
-    else if(y0 == y1)
-    {
-        FillFlatTopTriangle(x0, y0, x1, y1, x2, y2, color);
-    }
-    else
-    {
-        int My = y1;
-        int Mx = (x2 - x0) * (y1 - y0) / (float)(y2 - y0) + x0;
+        for(int y = v0.y; y <= v1.y; y++)
+        {
+            int x_start = v1.x + (y - v1.y) * inv_slope1;
+            int x_end = v0.x + (y - v0.y) * inv_slope2;
+            if(x_end < x_start)
+                std::swap(x_start, x_end);
 
-        FillFlatBottomTriangle(x0, y0, x1, y1, Mx, My, color);
-        FillFlatTopTriangle(x1, y1, Mx, My, x2, y2, color);
+            for(int x = x_start; x < x_end; x++)
+            {
+                DrawTrianglePixel(x, y, color, point_a, point_b, point_c);
+            }
+        }
+    }
+
+
+    inv_slope1 = 0;
+    inv_slope2 = 0;
+
+    if (v2.y - v1.y != 0) inv_slope1 = (float)(v2.x - v1.x) / abs(v2.y - v1.y);
+    if( v2.y - v0.y !=0 ) inv_slope2 = (float)(v2.x - v0.x) / abs(v2.y - v0.y);
+
+    if(v2.y - v1.y != 0)
+    {
+        for(int y = v1.y; y <= v2.y; y++)
+        {
+            int x_start = v1.x + (y - v1.y) * inv_slope1;
+            int x_end = v0.x + (y - v0.y) * inv_slope2;
+            if(x_end < x_start)
+                std::swap(x_start, x_end);
+
+            for(int x = x_start; x < x_end; x++)
+            {
+                DrawTrianglePixel(x, y, color, point_a, point_b, point_c);
+            }
+        }
     }
 }
 
@@ -224,7 +298,14 @@ void Display::DrawTexel(int x, int y, uint32_t* texture, Vec4D point_a, Vec4D po
     int tex_x = abs((int)(interpolated_u * uv0.width));
     int tex_y = abs((int)(interpolated_v * uv0.height));
     if(tex_x >=0 && tex_y >= 0 && tex_x < uv0.width && tex_y < uv0.height)
-        DrawPixel(x, y, texture[tex_y * uv0.width + tex_x]);
+    {
+        interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
+        if(interpolated_reciprocal_w < m_zBuffer[m_windowWidth * y + x])
+        {
+            DrawPixel(x, y, texture[tex_y * uv0.width + tex_x]);
+            m_zBuffer[m_windowWidth * y + x] = interpolated_reciprocal_w;
+        }
+    }
 }
 
 

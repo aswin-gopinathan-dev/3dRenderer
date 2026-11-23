@@ -191,17 +191,15 @@ void update(void)
         triangle.tex[0] = face.a_uv;
         triangle.tex[1] = face.b_uv;
         triangle.tex[2] = face.c_uv;
-        triangle.avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3;
         triangles_to_render.push_back(triangle);
     }
-
-    std::sort(triangles_to_render.begin(), triangles_to_render.end(), [](Triangle a, Triangle b) { return a.avg_depth > b.avg_depth;});
 }
 
 
 void render(void) 
 {
     g_display.ClearColorBuffer(0xFF000000);    
+    g_display.ClearZBuffer();
     g_display.DrawGrid();
 
     for (auto triangle : triangles_to_render)
@@ -209,9 +207,9 @@ void render(void)
         if(g_renderMethod == RenderMethod::RENDER_FILL_TRIANGLE || 
            g_renderMethod == RenderMethod::RENDER_FILL_TRIANGLE_WIRE)
         {
-            g_display.DrawFilledTriangle(triangle.points[0].x, triangle.points[0].y, 
-                                         triangle.points[1].x, triangle.points[1].y, 
-                                         triangle.points[2].x, triangle.points[2].y, 
+            g_display.DrawFilledTriangle(triangle.points[0], 
+                                         triangle.points[1], 
+                                         triangle.points[2], 
                                          triangle.color);
         }
 
