@@ -34,7 +34,7 @@ class Vec3D
 public:
     Vec3D();
     Vec3D(float a, float b, float c);
-    Vec3D(Vec4D& v);
+    Vec3D(const Vec4D& v);
     ~Vec3D();
     void print(std::string msg = "") { std::cout << msg << " " << x << ", " << y << ", " << z << std::endl; }
 

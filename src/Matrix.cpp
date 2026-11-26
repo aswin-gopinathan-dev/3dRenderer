@@ -129,3 +129,22 @@ Vec4D Matrix::Project(Vec4D v)
 
     return result;
 }
+
+
+Matrix Matrix::LookAt(Vec3D eye, Vec3D target, Vec3D up)
+{
+    // Compute forward(z), right(x) and up(y) vectors
+    Vec3D z = target.Sub(eye);
+    z.Normalize();
+    Vec3D x = up.Cross(z);
+    x.Normalize();
+    Vec3D y = z.Cross(x);
+
+    Matrix view_matrix;
+    view_matrix.m[0][0] = x.x; view_matrix.m[0][1] = x.y; view_matrix.m[0][2] = x.z; view_matrix.m[0][3] = -x.Dot(eye);
+    view_matrix.m[1][0] = y.x; view_matrix.m[1][1] = y.y; view_matrix.m[1][2] = y.z; view_matrix.m[1][3] = -y.Dot(eye);
+    view_matrix.m[2][0] = z.x; view_matrix.m[2][1] = z.y; view_matrix.m[2][2] = z.z; view_matrix.m[2][3] = -z.Dot(eye);
+    view_matrix.m[3][0] = 0.0; view_matrix.m[3][1] = 0.0; view_matrix.m[3][2] = 0.0; view_matrix.m[3][3] = 1.0;
+
+    return view_matrix;
+}

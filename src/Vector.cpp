@@ -84,7 +84,7 @@ Vec3D::Vec3D(float a, float b, float c) : x(a), y(b), z(c)
 
 }
 
-Vec3D::Vec3D(Vec4D& v)
+Vec3D::Vec3D(const Vec4D& v)
 {
     x = v.x;
     y = v.y;
@@ -148,7 +148,7 @@ Vec3D Vec3D::Multiply(float s)
     Vec3D result;
     result.x = x * s;
     result.y = y * s;
-    result.z = z * z;
+    result.z = z * s;
     return result;
 }
 
@@ -157,7 +157,7 @@ Vec3D Vec3D::Div(float s)
     Vec3D result;
     result.x = x / s;
     result.y = y / s;
-    result.z = z / z;
+    result.z = z / s;
     return result;
 }
 

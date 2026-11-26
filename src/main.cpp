@@ -7,6 +7,7 @@
 #include "Matrix.h"
 #include "Light.h"
 #include "Texture.h"
+#include "Camera.h"
 #include <vector>
 #include <algorithm>
 #include "upng.h"
@@ -14,7 +15,7 @@
 bool is_running = true;
 Display g_display;
 Mesh g_mesh;
-Vec3D camera_pos {0, 0, 0};
+Camera g_camera;
 Matrix projection_matrix;
 Light g_light(Vec3D(0, 0, 1));
 TextureData g_textureData;
@@ -85,8 +86,26 @@ void process_input(void)
                 g_renderMethod = RenderMethod::RENDER_TEXTURED_WIRE;
             if (event.key.keysym.sym == SDLK_c)
                 g_cullMethod = CullMethod::CULL_BACKFACE;
-            if (event.key.keysym.sym == SDLK_d)
+            if (event.key.keysym.sym == SDLK_x)
                 g_cullMethod = CullMethod::CULL_NONE;
+            if (event.key.keysym.sym == SDLK_UP)
+                g_camera.position.y += 0.05;
+            if (event.key.keysym.sym == SDLK_DOWN)
+                g_camera.position.y -= 0.05;
+            if (event.key.keysym.sym == SDLK_a)
+                g_camera.yaw += 0.05;
+            if (event.key.keysym.sym == SDLK_d)
+                g_camera.yaw -= 0.05;
+            if (event.key.keysym.sym == SDLK_s)
+            {
+                g_camera.forward_velocity = g_camera.direction.Multiply(0.5);
+                g_camera.position = g_camera.position.Sub(g_camera.forward_velocity);
+            }
+            if (event.key.keysym.sym == SDLK_w)
+            {
+                g_camera.forward_velocity = g_camera.direction.Multiply(0.5);
+                g_camera.position = g_camera.position.Add(g_camera.forward_velocity);
+            }
             break;
     }
 }
@@ -94,12 +113,14 @@ void process_input(void)
 
 void update(void) 
 {
-    g_mesh.rotation.x += 0.005;
-    g_mesh.rotation.y += 0.005;
-    g_mesh.rotation.z += 0.005;
+    //g_mesh.rotation.x += 0.005;
+    //g_mesh.rotation.y += 0.005;
+    //g_mesh.rotation.z += 0.005;
     //g_mesh.scale.x += 0.002;
     //g_mesh.translation.x += 0.01;
     g_mesh.translation.z = 5.0;
+    //g_camera.position.x += 0.008;
+    //g_camera.position.y += 0.008;
 
     Matrix scale_matrix;
     scale_matrix.Scale(g_mesh.scale.x, g_mesh.scale.y, g_mesh.scale.z);
@@ -119,6 +140,16 @@ void update(void)
     world_matrix = world_matrix.Multiply(rotation_matrix_z);
     world_matrix = world_matrix.Multiply(scale_matrix);
 
+    Matrix view_matrix;
+    Vec3D up_direction = {0, 1, 0};
+    Vec3D target = {0, 0, 1};
+    Matrix camera_yaw_rotation;
+    camera_yaw_rotation.RotateY(g_camera.yaw);
+    g_camera.direction = camera_yaw_rotation.Multiply(target);
+    target = g_camera.position.Add(g_camera.direction);
+
+    view_matrix = view_matrix.LookAt(g_camera.position, target, up_direction);
+
     triangles_to_render.clear();
     std::vector<Vec3D> vertices = g_mesh.GetMeshVertices();
     std::vector<Face> faces = g_mesh.GetMeshFaces();
@@ -134,6 +165,7 @@ void update(void)
         for (auto vertex : face_vertices)
         {
             Vec4D transformed_vertex = world_matrix.Multiply(vertex);
+            transformed_vertex = view_matrix.Multiply(transformed_vertex);
             transformed_vertices.push_back(transformed_vertex);
         }
 
@@ -149,7 +181,8 @@ void update(void)
         normal.Normalize();
 
         // Find camera ray
-        Vec3D camera_ray = camera_pos.Sub(A);
+        Vec3D origin = {0, 0, 0};
+        Vec3D camera_ray = origin.Sub(A);
 
         // Find how aligned is camera ray with face normal
         float dot = camera_ray.Dot(normal);

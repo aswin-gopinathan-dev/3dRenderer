@@ -17,6 +17,7 @@ public:
     void RotateZ(float angle);
     Matrix ProjectionMatrix(float fov, float aspect, float znear, float zfar);
     Vec4D Project(Vec4D v);
+    Matrix LookAt(Vec3D eye, Vec3D target, Vec3D up);
 
     Vec4D Multiply(Vec4D v);
     Matrix Multiply(Matrix& matrix);
